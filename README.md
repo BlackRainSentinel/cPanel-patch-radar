@@ -1,102 +1,94 @@
 <div align="center">
 
 ```
-   ___  ____  __   ____  ____  __       ____  __  ____  ____  _  _     ____  __   ____   __   ____
-  / __)(  _ \/ _\ (  _ \(  __)(  )     (  _ \/ _\(_  _)/ ___\/ )( \   (  _ \/ _\ (    \ / _\ (  _ \
- ( (__  ) __/    \ ) __/ ) _)  ) (_/\   ) __/    \  )(  \___ \) __ (    )   /    \ ) D (    \  )   /
-  \___)(__)  \_/\_/(__)  (____)(_____/  (__)  \_/\_/(__) (____/\_)(_/   (__\_)\_/\_/(____/\_/\_(__\_)
+██████╗ ██████╗ ███╗   ██╗███████╗██╗      
+██╔══██╗██╔══██╗████╗  ██║██╔════╝██║      
+██████╔╝███████║██╔██╗ ██║█████╗  ██║      
+██╔═══╝ ██╔══██║██║╚██╗██║██╔══╝  ██║      
+██║     ██║  ██║██║ ╚████║███████╗███████╗ 
+╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝
+         RADAR :: cPanel/WHM CVE Audit
 ```
-
-**cPanel/WHM CVE Audit & Remediation Tool**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-cPanel%2FWHM-orange.svg)](https://cpanel.net)
 [![Shell](https://img.shields.io/badge/Shell-Bash-green.svg)](https://www.gnu.org/software/bash/)
 [![CVEs Covered](https://img.shields.io/badge/CVEs%20Covered-12-red.svg)](#cve-coverage)
-[![Maintained](https://img.shields.io/badge/Maintained-Yes-brightgreen.svg)](https://github.com/danialsobhani/cpanel-patch-radar)
+[![Maintained](https://img.shields.io/badge/Maintained-Yes-brightgreen.svg)](https://github.com/BlackRainSentinel/cPanel-patch-radar)
 
 </div>
 
 ---
 
-**cpanel-patch-radar** is a single-file Bash tool for auditing cPanel/WHM servers against the latest CVEs and security advisories. It checks version status, reports vulnerabilities with severity levels, and can apply targeted package fixes — all with a clean terminal UI and optional HTML report for client delivery.
+I work in the security unit of a hosting company. We manage 300+ cPanel servers and when the May 2026 CVE batch dropped, manually checking each one wasn't an option anymore — especially after seeing a few servers in our network get hit before patches were applied.
 
-> Built by a Linux Security Specialist at a hosting provider. Real-world tested. No bloat.
+I wrote this to automate what I was doing by hand. Single file, no dependencies, runs anywhere cPanel is installed.
 
 ---
 
-## Features
+## What it does
 
-- **12 CVEs & Advisories covered** (May 2026 batch + CVE-2026-41940)
-- **Targeted package fixes** — only updates the vulnerable package, never a full `upcp --force`
-- **Optional backup** before applying any fix
-- **HTML report** — professional, dark-themed, ready to send to clients
-- **Color-coded terminal output** — PASS / FAIL / WARN / FIXED / SKIP
-- **Flag-based CLI** — scriptable, cron-friendly, no interactive prompts by default
-- **Single file, zero dependencies** — just Bash + rpm/yum (standard on AlmaLinux/CloudLinux)
-- **Audit log** saved to `/var/log/cpanel-patch-radar/`
+Checks your cPanel/WHM server against 12 CVEs and security advisories from the May 2026 patch batch — including the critical auth bypass (CVE-2026-41940). Tells you what's vulnerable, what's patched, and can apply targeted fixes if you want.
+
+No full `upcp --force`. No unnecessary reboots. Just checks the packages that matter and updates only what's broken.
 
 ---
 
 ## Quick Start
 
 ```bash
-# Audit only (safe, no changes)
-bash cpanel-patch-radar.sh
-
-# Audit + fix (asks confirmation before each fix)
-bash cpanel-patch-radar.sh --fix
-
-# Audit + fix + backup before changes
-bash cpanel-patch-radar.sh --fix --backup
-
-# Audit + generate HTML report
-bash cpanel-patch-radar.sh --report
-
-# Full run: fix, backup, HTML report
-bash cpanel-patch-radar.sh --fix --backup --report
-
-# Check a single CVE
-bash cpanel-patch-radar.sh --cve CVE-2026-41940
+git clone https://github.com/BlackRainSentinel/cPanel-patch-radar.git
+cd cPanel-patch-radar
+chmod +x cPanel-patch-radar.sh
+bash cPanel-patch-radar.sh
 ```
+
+> Must be run as root on a cPanel/WHM server.
 
 ---
 
-## Installation
+## Usage
 
 ```bash
-git clone https://github.com/danialsobhani/cpanel-patch-radar.git
-cd cpanel-patch-radar
-chmod +x cpanel-patch-radar.sh
-bash cpanel-patch-radar.sh
-```
+# Just audit — no changes
+bash cPanel-patch-radar.sh
 
-**Requirements:**
-- Root access
-- cPanel/WHM server (AlmaLinux 8/9, CloudLinux 8/9)
-- Bash 4.0+
-- `rpm` and `yum` (standard on all cPanel-supported distros)
+# Audit and fix (confirms before each change)
+bash cPanel-patch-radar.sh --fix
+
+# Audit + fix + backup config files first
+bash cPanel-patch-radar.sh --fix --backup
+
+# Generate an HTML report (good for sending to clients)
+bash cPanel-patch-radar.sh --report
+
+# Everything at once
+bash cPanel-patch-radar.sh --fix --backup --report
+
+# Check one specific CVE
+bash cPanel-patch-radar.sh --cve CVE-2026-41940
+```
 
 ---
 
-## CLI Options
+## Flags
 
-| Flag | Description |
+| Flag | What it does |
 |------|-------------|
-| *(none)* | Audit only — no changes made |
-| `--fix` | Apply targeted package updates (asks confirmation per fix) |
-| `--backup` | Create backups before applying fixes |
-| `--report` | Generate HTML report in `/var/log/cpanel-patch-radar/` |
-| `--cve <ID>` | Audit a single CVE (e.g. `--cve CVE-2026-41940`) |
-| `--quiet` | Suppress banner and info output |
-| `--version` | Show version |
-| `--help` | Show help |
+| *(none)* | Audit only, zero changes |
+| `--fix` | Targeted package update, asks confirmation first |
+| `--backup` | Backs up config files before touching anything |
+| `--report` | Saves an HTML report to `/var/log/cpanel-patch-radar/` |
+| `--cve <ID>` | Run check for one CVE only |
+| `--quiet` | No banner, just results |
+| `--version` | Print version |
+| `--help` | Print help |
 
 ---
 
 ## CVE Coverage
 
-| CVE / Advisory | Severity | Package | Fix Date |
+| CVE / Advisory | Severity | Package | Fixed |
 |---|---|---|---|
 | CVE-2026-41940 | 🔴 CRITICAL | cpanel | 2026-05-10 |
 | CVE-2026-9256 | 🟠 HIGH | ea-nginx | 2026-05-22 |
@@ -113,61 +105,40 @@ bash cpanel-patch-radar.sh
 
 ---
 
-## How Fixes Work
+## How fixes work
 
-This tool uses **targeted package updates only**:
+Each fix runs a targeted `yum update` on only the affected package:
 
 ```bash
-yum update -y <vulnerable-package>
+yum update -y <package>
 ```
 
-It does **not** run `upcp --force` or `upcp --tier=current`. A full cPanel update on a production server carries downtime risk — we never do that automatically.
+Before applying anything, the tool asks for confirmation. If you pass `--backup`, it copies the relevant config files first. The log goes to `/var/log/cpanel-patch-radar/`.
 
-Fix flow for each vulnerability:
-1. Check current version
-2. Confirm with operator before any change
-3. Optional: backup config files
-4. Run targeted `yum update`
-5. Log result
+cPanel has a habit of shipping new bugs with every update cycle. I'd rather patch one package at a time than run a full update and deal with whatever breaks next.
 
 ---
 
-## Output & Logs
+## Output
 
-**Terminal output:**
-```
-  ✔ PASS  [HIGH]      CVE-2026-9256
-           ea-nginx Security Release — Installed: 1.31.1-1.cp1208
+Terminal output is color-coded — green for patched, red for vulnerable, yellow for warnings. Each result shows the CVE, severity, installed version, and fix date.
 
-  ✘ FAIL  [CRITICAL]  CVE-2026-41940
-           cPanel Authentication Bypass — cPanel 120.0.10 is vulnerable.
+If you use `--report`, it generates a dark-themed HTML file you can attach to a ticket or send to a client without them needing to read raw terminal output.
 
-  ⚠ WARN  [INFO]      LITESPEED-AUTO-REMOVE
-           LiteSpeed is installed. Nightly update may auto-remove it.
-```
+---
 
-**Log file:** `/var/log/cpanel-patch-radar/audit_YYYYMMDD_HHMMSS.log`
+## Requirements
 
-**HTML report:** `/var/log/cpanel-patch-radar/report_YYYYMMDD_HHMMSS.html`
-Dark-themed, professional layout — ready to attach to a ticket or email to a client.
+- Root access
+- cPanel/WHM (AlmaLinux 8/9 or CloudLinux 8/9)
+- Bash 4.0+
+- `rpm` and `yum` — already there on any cPanel server
 
 ---
 
 ## Disclaimer
 
-This tool is intended for **authorized system administrators** auditing servers they own or manage. Running security tools against systems without permission is illegal. The author takes no responsibility for misuse.
-
-Fixes are applied via standard `yum` package management. Always review changes in a staging environment before production. Taking backups (`--backup`) is strongly recommended.
-
----
-
-## Contributing
-
-Pull requests welcome. If you find a new cPanel CVE not covered here, open an issue with:
-- CVE ID
-- Affected package
-- Fixed version
-- Source (cPanel security advisories page)
+Only run this on servers you own or have permission to audit. The author isn't responsible for misuse.
 
 ---
 
@@ -176,9 +147,3 @@ Pull requests welcome. If you find a new cPanel CVE not covered here, open an is
 **Danial Sobhani** — Linux Security Specialist  
 Telegram: [@danial_hmt](https://t.me/danial_hmt)  
 Website: [danialsobhani.ir](https://danialsobhani.ir)
-
----
-
-<div align="center">
-<sub>MIT License — Free to use, modify, and distribute.</sub>
-</div>
