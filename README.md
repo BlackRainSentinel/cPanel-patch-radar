@@ -143,7 +143,4 @@ Only run this on servers you own or have permission to audit. The author isn't r
 ---
 
 ## Author
-
-**Danial Sobhani** — Linux Security Specialist  
 Telegram: [@danial_hmt](https://t.me/danial_hmt)  
-Website: [danialsobhani.ir](https://danialsobhani.ir)
