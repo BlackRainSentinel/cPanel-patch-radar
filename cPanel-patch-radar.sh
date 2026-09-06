@@ -9,7 +9,7 @@
 set -euo pipefail
 
 # ---------------------------------------------------------------------------
-# Constants & Version
+# Constants & VersioN
 # ---------------------------------------------------------------------------
 readonly VERSION="1.0.0"
 readonly TOOL_NAME="cpanel-patch-radar"
