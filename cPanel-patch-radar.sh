@@ -3,7 +3,7 @@
 #  cpanel-patch-radar - cPanel/WHM CVE Audit & Remediation Tool
 #  Author  : Danial Sobhani (@danial_hmt)
 #  License : MIT
-#  Version : 1.0.0
+#  Version : 1.0.1
 # =============================================================================
 
 set -euo pipefail
